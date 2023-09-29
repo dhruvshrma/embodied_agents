@@ -1,10 +1,9 @@
-# agents/base_agent.py
+from pydantic import BaseModel
 
 
-class BaseAgent:
-    def __init__(self, agent_id):
-        self.agent_id = agent_id  # Unique identifier for each agent
-        self.opinion = 0  # Neutral by default
+class BaseAgent(BaseModel):
+    agent_id: int
+    opinion: int = 0
 
     def set_opinion(self, opinion):
         self.opinion = opinion
