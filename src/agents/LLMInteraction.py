@@ -15,14 +15,53 @@ class LLMInteraction:
         self.llm = llm
 
     def chain(
-        self, prompt: PromptTemplate, memory: MemoryManager, verbose: bool = False
+        self,
+        prompt: PromptTemplate,
     ) -> LLMChain:
-        return LLMChain(
-            llm=self.llm,
-            prompt=prompt,
-            verbose=verbose,
-            memory=memory.memory_source,
+        return LLMChain(llm=self.llm, prompt=prompt)
+
+    def score_memory_importance(self, memory_content: str) -> float:
+        """Score the absolute importance of the given memory."""
+        prompt = PromptTemplate.from_template(
+            "On the scale of 1 to 10, where 1 is purely mundane"
+            + " (e.g., brushing teeth, making bed) and 10 is"
+            + " extremely poignant (e.g., a break up, college"
+            + " acceptance), rate the likely poignancy of the"
+            + " following piece of memory. Respond with a single integer."
+            + "\nMemory: {memory_content}"
+            + "\nRating: "
         )
+        score = self.chain(prompt).run(memory_content=memory_content).strip()
+        if self.verbose:
+            logger.info(f"Importance score: {score}")
+        match = re.search(r"^\D*(\d+)", score)
+        if match:
+            return (float(match.group(1)) / 10) * self.importance_weight
+        else:
+            return 0.0
+
+    def score_memories_importance(self, memory_content: str) -> List[float]:
+        """Score the absolute importance of the given memory."""
+        prompt = PromptTemplate.from_template(
+            "On the scale of 1 to 10, where 1 is purely mundane"
+            + " (e.g., brushing teeth, making bed) and 10 is"
+            + " extremely poignant (e.g., a break up, college"
+            + " acceptance), rate the likely poignancy of the"
+            + " following piece of memory. Always answer with only a list of numbers."
+            + " If just given one memory still respond in a list."
+            + " Memories are separated by semi colans (;)"
+            + " Memories: {memory_content}"
+            + "\nRating: "
+        )
+        scores = self.chain(prompt).run(memory_content=memory_content).strip()
+
+        if self.verbose:
+            logger.info(f"Importance scores: {scores}")
+
+        # Split into list of strings and convert to floats
+        scores_list = [float(x) for x in scores.split(";")]
+
+        return scores_list
 
 
 class MemoryInteraction:
