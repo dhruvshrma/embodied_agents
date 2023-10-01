@@ -1,4 +1,5 @@
 from agents.base_agent import BaseAgent
+from agents.SimpleAgent import SimpleAgent
 from agents.GenerativeSocialAgent import GenerativeSocialAgent
 
 
