@@ -6,6 +6,7 @@ from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain.vectorstores import FAISS
 from agents.GenerativeAgentMemory import GenerativeAgentMemory
 from langchain.chat_models import ChatOpenAI
+from langchain.llms import Ollama
 
 
 def relevance_score_fn(score: float) -> float:
@@ -28,8 +29,40 @@ def create_new_memory_retriever():
     )
 
 
-def language_model_and_memory():
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.0, max_tokens=1500)
+def ChatOpenAI_init_func(model_name: str):
+    return ChatOpenAI(model_name=model_name, temperature=0.0, max_tokens=1500)
+
+
+def Ollama_init_func(model_name: str):
+    llm = Ollama(model=model_name, temperature=0.0)
+    return llm
+
+
+MODEL_MAP = {
+    "gpt-3.5-turbo": (ChatOpenAI, ChatOpenAI_init_func),
+    "gpt-3.5-turbo-16k-0613": (ChatOpenAI, ChatOpenAI_init_func),
+    "llama2:13b": (
+        Ollama,
+        Ollama_init_func,
+    ),
+    "mistral": (
+        Ollama,
+        Ollama_init_func,
+    ),
+    "llama2-uncensored": (
+        Ollama,
+        Ollama_init_func,
+    ),
+}
+
+
+def language_model_and_memory(model_name: str = "gpt-3.5-turbo"):
+    module, init_func = MODEL_MAP.get(model_name, (None, None))
+    if module is None or init_func is None:
+        raise ValueError(f"Unsupported model name: {model_name}")
+
+    llm = init_func(model_name=model_name)
+
     memory = GenerativeAgentMemory(
         llm=llm, memory_retriever=create_new_memory_retriever(), reflection_threshold=8
     )

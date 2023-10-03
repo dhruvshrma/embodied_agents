@@ -1,15 +1,42 @@
-# agents/special_agent.py
-
+from pydantic import Field, root_validator
 from agents.base_agent import BaseAgent
+
+from typing import Union
+from typing import List, Optional
+from langchain.chat_models import ChatOpenAI, ChatOllama
+
+from langchain.schema import (
+    HumanMessage,
+    SystemMessage,
+)
 
 
 class SimpleAgent(BaseAgent):
-    def __init__(self, agent_id, special_attribute):
-        self.agent_id = agent_id
-        self.special_attribute = special_attribute
+    name: str
+    system_message: Optional[SystemMessage] = None
+    model: Union[ChatOpenAI, ChatOllama]
+    prefix: str = Field(default=None)
+    message_history: List[str] = Field(
+        default_factory=lambda: ["Here is the conversation so far."]
+    )
 
-    def set_opinion(self, opinion):
-        self.opinion = opinion
+    @root_validator(pre=True)
+    def set_prefix(cls, values):
+        name = values.get("name")
+        values["prefix"] = f"{name}: "
+        return values
 
-    def get_opinion(self):
-        return self.opinion
+    def reset(self):
+        self.message_history = ["Here is the conversation so far."]
+
+    def send(self) -> str:
+        message = self.model(
+            [
+                self.system_message,
+                HumanMessage(content="\n".join(self.message_history + [self.prefix])),
+            ]
+        )
+        return message.content
+
+    def receive(self, name: str, message: str) -> None:
+        self.message_history.append(f"{name}: {message}")

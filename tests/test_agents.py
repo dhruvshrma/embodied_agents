@@ -1,12 +1,30 @@
-from agents.base_agent import BaseAgent
-from agents.GenerativeSocialAgent import GenerativeSocialAgent
+from langchain.schema import SystemMessage
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
+from agents.base_agent import BaseAgent
+from agents.SimpleAgent import SimpleAgent
+from agents.GenerativeSocialAgent import GenerativeSocialAgent
+import pytest
 from utils.log_config import setup_logging, print_to_log
 
 from dotenv import load_dotenv
 
 load_dotenv()
 logger = setup_logging()
+
+
+@pytest.fixture
+def language_model():
+    from langchain.chat_models import ChatOllama, ChatOpenAI
+
+    # llm = ChatOllama(
+    #     model="llama2",
+    #     temperature=0.0,
+    #     callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+    # )
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
+    return llm
 
 
 def test_agent_initialization():
@@ -36,3 +54,17 @@ def test_initialize_with_language_model(language_model_and_memory):
     agent.memory = memory
 
     print_to_log(agent.get_summary())
+
+
+def test_initialize_simple_agent(language_model):
+    llm = language_model
+    agent = SimpleAgent(name="Mahler", system_message=None, model=llm, agent_id=1)
+
+    assert agent.agent_id == 1
+    assert agent.get_opinion() == 0
+
+    assert agent.system_message is None
+    assert agent.message_history == ["Here is the conversation so far."]
+    assert agent.prefix == "Mahler: "
+    agent.system_message = SystemMessage(content="Hello")
+    print(agent.send())
