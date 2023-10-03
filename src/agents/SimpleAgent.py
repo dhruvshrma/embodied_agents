@@ -14,7 +14,7 @@ from langchain.schema import (
 class SimpleAgent(BaseAgent):
     name: str
     system_message: Optional[SystemMessage] = None
-    model: Union[ChatOpenAI, ChatOllama]
+    model: Optional[Union[ChatOpenAI, ChatOllama]] = None
     prefix: str = Field(default=None)
     message_history: List[str] = Field(
         default_factory=lambda: ["Here is the conversation so far."]

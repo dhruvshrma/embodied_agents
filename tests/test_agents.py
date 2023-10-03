@@ -1,6 +1,4 @@
 from langchain.schema import SystemMessage
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 from agents.base_agent import BaseAgent
 from agents.SimpleAgent import SimpleAgent
