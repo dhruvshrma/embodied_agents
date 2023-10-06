@@ -76,4 +76,6 @@ def test_reset(setup_graph_environment):
 
     assert sim._step == 0
     assert all([len(agent.message_history) == 1 for agent in sim.agents])
+    for agent in sim.agents:
+        assert agent.message_history == ["Here is the conversation so far."]
     assert len(sim.history) == 0
