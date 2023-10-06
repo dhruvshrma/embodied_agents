@@ -1,14 +1,27 @@
-from environments.GraphEnvironment import GraphEnvironment
+import random
+from typing import List, Union
+from pydantic import BaseModel
+from agents.SimpleAgent import SimpleAgent
+from interactions.DialogueSimulation import DialogueSimulator
+from interactions.VoterModel import VoterModel
 
 
-class SimulationRunner:
-    def __init__(self, num_agents, topology, interaction_model, num_rounds):
-        self.environment = GraphEnvironment(topology=topology, num_agents=num_agents)
-        self.interaction_model = interaction_model
-        self.num_rounds = num_rounds
+def random_selector(agents: List[SimpleAgent]) -> int:
+    """A simple selector function that chooses an agent at random."""
+    return random.choice(range(len(agents)))
+
+
+class SimulationRunner(BaseModel):
+    num_rounds: int
+    interaction_model: Union[DialogueSimulator, VoterModel]
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def run_simulation(self):
-        for _ in range(self.num_rounds):
-            for agent in self.environment.agents:
-                neighbors = self.environment.get_neighbors(agent)
-                self.interaction_model.interact(agent, neighbors)
+        for i in range(self.num_rounds):
+            print("----")
+            print(f"Round {i}")
+            name, message = self.interaction_model.step()
+            print(f"{name}: {message}")
+            print("----")

@@ -7,7 +7,7 @@ class DialogueSimulator:
     def __init__(
         self,
         environment: GraphEnvironment,
-        selection_function: Callable[[int, List[SimpleAgent], GraphEnvironment], int],
+        selection_function: Callable[[List[SimpleAgent]], int],
     ) -> None:
         self.environment = environment
         self.agents = environment.agents
@@ -21,8 +21,9 @@ class DialogueSimulator:
         self.history.clear()
         self._step = 0
 
-    def inject(self, name: str, message: str):
+    def inject(self, idx: int, message: str):
         """Initiates the conversation with a message from a name."""
+        name = self.agents[idx].name
         for agent in self.agents:
             agent.receive(name, message)
         self._log_interaction(name, message)
@@ -30,9 +31,7 @@ class DialogueSimulator:
     def step(self) -> Tuple[str, str]:
         """Simulate a single step of interaction."""
         # 1. Choose the next speaker
-        speaker_idx = self.select_next_speaker(
-            self._step, self.agents, self.environment
-        )
+        speaker_idx = self.select_next_speaker(self.agents)
         speaker = self.agents[speaker_idx]
 
         # 2. Next speaker sends message

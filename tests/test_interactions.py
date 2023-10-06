@@ -24,7 +24,7 @@ def test_voter_model_interaction():
     assert agent1.get_opinion() == -1
 
 
-def random_selector(step: int, agents: List[SimpleAgent], env: GraphEnvironment) -> int:
+def random_selector(agents: List[SimpleAgent]) -> int:
     """A simple selector function that chooses an agent at random."""
     return random.choice(range(len(agents)))
 
