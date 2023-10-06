@@ -13,7 +13,7 @@ from langchain.schema import (
 
 class SimpleAgent(BaseAgent):
     name: str
-    system_message: Optional[SystemMessage] = None
+    system_message: Optional[SystemMessage] = SystemMessage(content="")
     model: Optional[Union[ChatOpenAI, ChatOllama]] = None
     prefix: str = Field(default=None)
     message_history: List[str] = Field(
