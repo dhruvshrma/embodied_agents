@@ -57,3 +57,8 @@ def test_run_with_injection(setup_graph_environment):
     assert runner.interaction_model._step == runner.num_rounds
     assert len(runner.interaction_model.history) == runner.num_rounds + 1
     assert len(runner.interaction_model.agents) == env.config.num_agents
+
+    # random_agent = random_selector(runner.interaction_model.agents)
+    # print(
+    #     f"History for {runner.interaction_model.agents[random_agent]}: {runner.interaction_model.agents[random_agent].message_history}"
+    # )
