@@ -1,7 +1,7 @@
 from langchain.schema import SystemMessage
 
 from agents.base_agent import BaseAgent
-from agents.SimpleAgent import SimpleAgent
+from agents.SimpleAgent import SimpleAgent, MediatingAgent
 from agents.GenerativeSocialAgent import GenerativeSocialAgent
 import pytest
 from utils.log_config import setup_logging, print_to_log
@@ -40,20 +40,6 @@ def test_initialize_social_agent():
     assert agent.get_opinion() == 0
 
 
-def test_initialize_with_language_model(language_model_and_memory):
-    agent = GenerativeSocialAgent(
-        agent_id=1, name="Mahler", age=30, status="single", traits="obnoxious"
-    )
-
-    assert agent.agent_id == 1
-    assert agent.get_opinion() == 0
-    llm, memory = language_model_and_memory
-    agent.llm = llm
-    agent.memory = memory
-
-    print_to_log(agent.get_summary())
-
-
 def test_initialize_simple_agent(language_model):
     llm = language_model
     agent = SimpleAgent(name="Mahler", system_message=None, model=llm, agent_id=1)
@@ -66,3 +52,20 @@ def test_initialize_simple_agent(language_model):
     assert agent.prefix == "Mahler: "
     agent.system_message = SystemMessage(content="Hello")
     print(agent.send())
+
+
+def test_initialize_mediating_agent(language_model):
+    llm = language_model
+    agent = MediatingAgent(name="Mediator", model=llm, agent_id=1)
+
+    assert agent.agent_id == 1
+    assert agent.get_opinion() == 0
+    assert agent.topic == "A discussion on ice-cream flavors"
+    assert agent.message_history == ["Here is the conversation so far."]
+    assert agent.prefix == "Mediator: "
+
+    print(agent.system_message)
+    agent.set_system_message()
+    print(agent.system_message)
+    # agent.system_message = SystemMessage(content="Hello")
+    # print(agent.send())

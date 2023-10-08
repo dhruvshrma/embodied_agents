@@ -1,6 +1,6 @@
-from typing import List, Callable, Tuple
+from typing import List, Callable, Tuple, Optional
 from environments.GraphEnvironment import GraphEnvironment
-from agents.SimpleAgent import SimpleAgent
+from agents.SimpleAgent import SimpleAgent, MediatingAgent
 
 
 class DialogueSimulator:
@@ -8,12 +8,25 @@ class DialogueSimulator:
         self,
         environment: GraphEnvironment,
         selection_function: Callable[[List[SimpleAgent]], int],
+        mediating_agent: Optional[MediatingAgent] = None,
+        topic: str = "",
     ) -> None:
         self.environment = environment
         self.agents = environment.agents
+        self.topic = topic
         self._step = 0
         self.select_next_speaker = selection_function
         self.history = []
+
+        if mediating_agent:
+            self.mediating_agent = mediating_agent
+            self.mediating_agent.set_topic(topic)
+            self.mediating_agent.set_system_message()
+        else:
+            self.mediating_agent = MediatingAgent(
+                name="Mediator", topic="", agent_id=-1
+            )
+            self.mediating_agent.set_topic(topic)
 
     def reset(self):
         for agent in self.agents:
@@ -21,9 +34,12 @@ class DialogueSimulator:
         self.history.clear()
         self._step = 0
 
-    def inject(self, idx: int, message: str):
-        """Initiates the conversation with a message from a name."""
-        name = self.agents[idx].name
+    def inject(self, idx: Optional[int] = None, message: Optional[str] = ""):
+        if idx is None:
+            name = self.mediating_agent.name
+            message = self.mediating_agent.topic_description
+        else:
+            name = self.agents[idx].name
         for agent in self.agents:
             agent.receive(name, message)
         self._log_interaction(name, message)
