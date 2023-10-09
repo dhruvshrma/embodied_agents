@@ -67,11 +67,6 @@ def test_run_with_injection(setup_graph_environment):
     assert len(runner.interaction_model.history) == runner.num_rounds + 1
     assert len(runner.interaction_model.agents) == env.config.num_agents
 
-    # random_agent = random_selector(runner.interaction_model.agents)
-    # print(
-    #     f"History for {runner.interaction_model.agents[random_agent]}: {runner.interaction_model.agents[random_agent].message_history}"
-    # )
-
 
 def test_run_with_mediator_injection(setup_graph_environment):
     env, sim = setup_graph_environment
@@ -100,11 +95,6 @@ def test_run_with_mediator_injection(setup_graph_environment):
     assert runner.interaction_model._step == runner.num_rounds
     assert len(runner.interaction_model.history) == runner.num_rounds + 1
     assert len(runner.interaction_model.agents) == env.config.num_agents
-
-    # random_agent = random_selector(runner.interaction_model.agents)
-    # print(
-    #     f"History for {runner.interaction_model.agents[random_agent]}: {runner.interaction_model.agents[random_agent].message_history}"
-    #
 
 
 def test_simulation_runner_with_config():
@@ -143,6 +133,3 @@ def test_simulation_runner_with_config_and_local_model():
         assert agent.model == ChatOllama(model="llama2:13b-chat", temperature=1.0)
     assert runner.interaction_model.topic == "A discussion on ice-cream flavors"
     assert runner.interaction_model._step == 0
-
-
-## Checking push to github
