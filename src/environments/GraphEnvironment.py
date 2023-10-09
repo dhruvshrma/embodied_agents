@@ -110,50 +110,65 @@ class GraphEnvironment:
         neighbor_nodes = list(self.graph[agent_node])
         return [self.graph.nodes[node]["agent"] for node in neighbor_nodes]
 
-    def visualize_graph_plotly(self):
-        pos = nx.spring_layout(self.graph)
+    def visualize_graph_plotly(self, dimension="2d", k=None):
+        if dimension == "2d":
+            pos = nx.spring_layout(self.graph, k=k)
+        else:
+            pos = nx.spring_layout(self.graph, dim=3, k=k)
 
-        edge_x = []
-        edge_y = []
+        edge_traces = []
         for edge in self.graph.edges():
-            x0, y0 = pos[edge[0]]
-            x1, y1 = pos[edge[1]]
-            edge_x.extend([x0, x1, None])
-            edge_y.extend([y0, y1, None])
+            if dimension == "2d":
+                edge_trace = go.Scatter(
+                    x=[pos[edge[0]][0], pos[edge[1]][0]],
+                    y=[pos[edge[0]][1], pos[edge[1]][1]],
+                    mode="lines",
+                    line=dict(color="#888", width=0.5),
+                    hoverinfo="none",
+                )
+            else:
+                edge_trace = go.Scatter3d(
+                    x=[pos[edge[0]][0], pos[edge[1]][0]],
+                    y=[pos[edge[0]][1], pos[edge[1]][1]],
+                    z=[pos[edge[0]][2], pos[edge[1]][2]],
+                    mode="lines",
+                    line=dict(color="#888", width=3),
+                    hoverinfo="none",
+                )
+            edge_traces.append(edge_trace)
 
-        edge_trace = go.Scatter(
-            x=edge_x,
-            y=edge_y,
-            line=dict(width=0.5, color="#888"),
-            hoverinfo="none",
-            mode="lines",
-        )
+        if dimension == "2d":
+            node_trace = go.Scatter(
+                x=[pos[node][0] for node in self.graph.nodes()],
+                y=[pos[node][1] for node in self.graph.nodes()],
+                mode="markers+text",
+                hoverinfo="text",
+                marker=dict(size=10, color="skyblue"),
+                text=[data["agent"].name for _, data in self.graph.nodes(data=True)],
+                textposition="top center",
+            )
+        else:
+            node_trace = go.Scatter3d(
+                x=[pos[node][0] for node in self.graph.nodes()],
+                y=[pos[node][1] for node in self.graph.nodes()],
+                z=[pos[node][2] for node in self.graph.nodes()],
+                mode="markers+text",
+                hoverinfo="text",
+                marker=dict(size=10, color="skyblue"),
+                text=[data["agent"].name for _, data in self.graph.nodes(data=True)],
+            )
 
-        node_x = []
-        node_y = []
-        for node in self.graph.nodes():
-            x, y = pos[node]
-            node_x.append(x)
-            node_y.append(y)
-
-        node_trace = go.Scatter(
-            x=node_x,
-            y=node_y,
-            mode="markers+text",
-            hoverinfo="text",
-            marker=dict(size=10, color="skyblue"),
-            text=[data["agent"].name for _, data in self.graph.nodes(data=True)],
-            textposition="top center",
-        )
-
-        fig = go.Figure(
-            data=[edge_trace, node_trace],
-            layout=go.Layout(
+        layout = (
+            go.Layout(
                 showlegend=False,
                 hovermode="closest",
                 margin=dict(b=0, l=0, r=0, t=0),
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            ),
+            )
+            if dimension == "2d"
+            else {}
         )
+
+        fig = go.Figure(data=edge_traces + [node_trace], layout=layout)
         fig.show()
