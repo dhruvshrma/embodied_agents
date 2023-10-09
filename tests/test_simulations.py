@@ -143,3 +143,6 @@ def test_simulation_runner_with_config_and_local_model():
         assert agent.model == ChatOllama(model="llama2:13b-chat", temperature=1.0)
     assert runner.interaction_model.topic == "A discussion on ice-cream flavors"
     assert runner.interaction_model._step == 0
+
+
+## Checking push to github
