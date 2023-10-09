@@ -45,17 +45,22 @@ class DialogueSimulator:
         self._log_interaction(name, message)
 
     def step(self) -> Tuple[str, str]:
-        """Simulate a single step of interaction."""
-        # 1. Choose the next speaker
-        speaker_idx = self.select_next_speaker(self.agents)
-        speaker = self.agents[speaker_idx]
-
-        # 2. Next speaker sends message
+        combined_list = self.agents + [self.mediating_agent]
+        speaker_idx = self.select_next_speaker(combined_list)
+        # speaker = self.agents[speaker_idx]
+        speaker = combined_list[speaker_idx]
         message = speaker.send()
+        if isinstance(speaker, MediatingAgent):
+            # If the speaker is the mediating agent, all agents receive the message
+            receivers = self.agents
+        else:
+            # If a regular agent is speaking, only their neighbors receive the message
+            receivers = self.environment.get_neighbors(speaker)
+            # Ensure the MediatingAgent also receives the message
+            if self.mediating_agent not in receivers:
+                receivers.append(self.mediating_agent)
 
-        # 3. Neighbors receive message (assuming neighbors are the ones to receive messages)
-        neighbors = self.environment.get_neighbors(speaker)
-        for receiver in neighbors:
+        for receiver in receivers:
             receiver.receive(speaker.name, message)
 
         # 4. Log interaction

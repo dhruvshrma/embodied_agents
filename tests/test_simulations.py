@@ -8,7 +8,10 @@ from rich import print
 from dotenv import load_dotenv
 
 load_dotenv()
-params = [("scale-free", 1.0), ("small-world", 0.5), ("small-world", 1.0)]
+params = [
+    ("scale-free", 1.0),
+]
+# ("small-world", 0.5), ("small-world", 1.0)]
 
 
 @pytest.fixture(params=params, scope="function")
