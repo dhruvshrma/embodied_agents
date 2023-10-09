@@ -69,8 +69,6 @@ class GraphEnvironment:
     ):
         self.config = config
         self.graph = self.create_topology()
-        self.agents = self.initialize_agents(agent_class)
-        self.attach_agents_to_nodes()
 
     def create_topology(self):
         if self.config.topology == "star":
@@ -86,22 +84,18 @@ class GraphEnvironment:
                 self.config.num_agents, m=self.config.scale_free_m
             )
 
-    def initialize_agents(self, agent_class):
-        if isinstance(agent_class, BaseAgent):
-            return [agent_class(agent_id=i) for i in range(self.config.num_agents)]
-        else:
-            return [
-                agent_class(agent_id=i, name=fake.name())
-                for i in range(self.config.num_agents)
-            ]
+    # def initialize_agents(self, agent_class):
+    #     if isinstance(agent_class, BaseAgent):
+    #         return [agent_class(agent_id=i) for i in range(self.config.num_agents)]
+    #     else:
+    #         return [
+    #             agent_class(agent_id=i, name=fake.name())
+    #             for i in range(self.config.num_agents)
+    #         ]
 
-    def attach_agents_to_nodes(self):
-        for i, agent in enumerate(self.agents):
-            self.graph.nodes[i]["agent"] = agent
-
-    def initialize_opinions_randomly(self):
-        for agent in self.agents:
-            agent.set_opinion(random.choice([-1, 0, 1]))
+    # def initialize_opinions_randomly(self):
+    #     for agent in self.agents:
+    #         agent.set_opinion(random.choice([-1, 0, 1]))
 
     def get_neighbors(self, agent):
         agent_node = [

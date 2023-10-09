@@ -8,13 +8,15 @@ class DialogueSimulator:
         self,
         environment: GraphEnvironment,
         selection_function: Callable[[List[SimpleAgent]], int],
+        agents: List[SimpleAgent],
         mediating_agent: Optional[MediatingAgent] = None,
         topic: str = "",
     ) -> None:
         self.environment = environment
-        self.agents = environment.agents
+        self.agents = agents
         self.topic = topic
         self._step = 0
+
         self.select_next_speaker = selection_function
         self.history = []
 

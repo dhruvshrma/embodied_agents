@@ -106,10 +106,14 @@ def test_simulation_runner_with_config():
     )
 
     runner = SimulationRunner(config=config, interaction_model=DialogueSimulator)
+    # runner.setup_simulation()
     # assert runner.num_rounds == 10
     assert runner.interaction_model.environment.config.num_agents == 7
-    for agent in runner.interaction_model.environment.agents:
+    for agent in runner.interaction_model.agents:
         assert agent.agent_description, "Agent description not set!"
+        # print(
+        #     f"Agent id : {agent.agent_id}, Agent name: {agent.name}, Agent description: {agent.agent_description}"
+        # )
     assert runner.interaction_model.topic == "A discussion on ice-cream flavors"
     assert runner.interaction_model._step == 0
     assert len(runner.interaction_model.history) == 0
