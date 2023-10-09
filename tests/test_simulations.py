@@ -1,7 +1,13 @@
 import pytest
-from simulation.SimulationRunner import SimulationRunner, random_selector
+from simulation.SimulationRunner import (
+    SimulationRunner,
+    random_selector,
+    SimulationConfig,
+    ModelType,
+    TopologyType,
+)
 from environments.GraphEnvironment import GraphEnvironment, GraphEnvironmentConfig
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, ChatOllama
 from agents.SimpleAgent import SimpleAgent, MediatingAgent
 from interactions.DialogueSimulation import DialogueSimulator
 from rich import print
@@ -99,3 +105,41 @@ def test_run_with_mediator_injection(setup_graph_environment):
     # print(
     #     f"History for {runner.interaction_model.agents[random_agent]}: {runner.interaction_model.agents[random_agent].message_history}"
     #
+
+
+def test_simulation_runner_with_config():
+    config = SimulationConfig(
+        num_rounds=10,
+        num_agents=7,
+        topology="scale-free",
+        topic="A discussion on ice-cream flavors",
+    )
+
+    runner = SimulationRunner(config=config, interaction_model=DialogueSimulator)
+    # assert runner.num_rounds == 10
+    assert runner.interaction_model.environment.config.num_agents == 7
+    for agent in runner.interaction_model.environment.agents:
+        assert agent.agent_description, "Agent description not set!"
+    assert runner.interaction_model.topic == "A discussion on ice-cream flavors"
+    assert runner.interaction_model._step == 0
+    assert len(runner.interaction_model.history) == 0
+
+
+def test_simulation_runner_with_config_and_local_model():
+    config = SimulationConfig(
+        num_rounds=10,
+        num_agents=7,
+        topology="scale-free",
+        topic="A discussion on ice-cream flavors",
+        model_type=ModelType.LLAMA2,
+    )
+
+    runner = SimulationRunner(config=config, interaction_model=DialogueSimulator)
+    # assert runner.num_rounds == 10
+    assert runner.interaction_model.environment.config.num_agents == 7
+    for agent in runner.interaction_model.environment.agents:
+        assert agent.agent_description, "Agent description not set!"
+        assert agent.model is not None
+        assert agent.model == ChatOllama(model="llama2:13b-chat", temperature=1.0)
+    assert runner.interaction_model.topic == "A discussion on ice-cream flavors"
+    assert runner.interaction_model._step == 0
