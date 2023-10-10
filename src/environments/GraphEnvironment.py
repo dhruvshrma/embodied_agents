@@ -1,13 +1,7 @@
-import random
-from typing import Type
-from typing import Union
-
 import networkx as nx
 from faker import Faker
 from pydantic import BaseModel, validator
 
-from agents.SimpleAgent import SimpleAgent
-from agents.base_agent import BaseAgent
 import plotly.graph_objects as go
 
 fake = Faker()
@@ -65,7 +59,6 @@ class GraphEnvironment:
     def __init__(
         self,
         config: GraphEnvironmentConfig,
-        agent_class: Type[Union[BaseAgent, SimpleAgent]] = BaseAgent,
     ):
         self.config = config
         self.graph = self.create_topology()
@@ -83,19 +76,6 @@ class GraphEnvironment:
             return nx.barabasi_albert_graph(
                 self.config.num_agents, m=self.config.scale_free_m
             )
-
-    # def initialize_agents(self, agent_class):
-    #     if isinstance(agent_class, BaseAgent):
-    #         return [agent_class(agent_id=i) for i in range(self.config.num_agents)]
-    #     else:
-    #         return [
-    #             agent_class(agent_id=i, name=fake.name())
-    #             for i in range(self.config.num_agents)
-    #         ]
-
-    # def initialize_opinions_randomly(self):
-    #     for agent in self.agents:
-    #         agent.set_opinion(random.choice([-1, 0, 1]))
 
     def get_neighbors(self, agent):
         agent_node = [

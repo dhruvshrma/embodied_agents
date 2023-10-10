@@ -9,10 +9,19 @@ from hypothesis.strategies import integers, floats
 
 @given(num_agents=integers(min_value=1, max_value=100))
 def test_graph_initialization_base(num_agents):
-    env = GraphEnvironment(num_agents=num_agents)
-    assert len(env.graph.nodes()) == num_agents
-    for i in range(num_agents):
-        assert isinstance(env.graph.nodes[i]["agent"], BaseAgent)
+    try:
+        config = GraphEnvironmentConfig(num_agents=num_agents, topology="star")
+        env = GraphEnvironment(config=config)
+        assert len(env.graph.nodes()) == num_agents
+        assert env.config.topology == "star"
+    except ValidationError:
+        pass
+
+
+def test_graph_initialization_failn1():
+    with pytest.raises(ValidationError):
+        config = GraphEnvironmentConfig(num_agents=1, topology="star")
+        env = GraphEnvironment(config=config)
 
 
 @given(
@@ -28,23 +37,13 @@ def test_graph_initialization_simple(num_agents, small_world_k, small_world_p):
             small_world_k=small_world_k,
             small_world_p=small_world_p,
         )
-        env = GraphEnvironment(agent_class=SimpleAgent, config=config)
+        env = GraphEnvironment(config=config)
         assert len(env.graph.nodes()) == num_agents
         assert env.config.topology == "small-world"
         assert env.config.small_world_k == small_world_k
         assert env.config.small_world_p == small_world_p
-
-        for i in range(num_agents):
-            assert isinstance(env.graph.nodes[i]["agent"], SimpleAgent)
     except ValidationError:
         pass
-
-
-def test_graph_agent_opinions():
-    env = GraphEnvironment(num_agents=5)
-    env.initialize_opinions_randomly()
-    for agent in env.agents:
-        assert agent.get_opinion() in [-1, 0, 1]
 
 
 def test_edge_case_equaln_k():
@@ -52,7 +51,7 @@ def test_edge_case_equaln_k():
         config = GraphEnvironmentConfig(
             num_agents=3, topology="small-world", small_world_k=3, small_world_p=0.5
         )
-        env = GraphEnvironment(agent_class=SimpleAgent, config=config)
+        env = GraphEnvironment(config=config)
 
 
 def test_edge_case_k1_n2():
@@ -60,4 +59,4 @@ def test_edge_case_k1_n2():
         config = GraphEnvironmentConfig(
             num_agents=2, topology="small-world", small_world_k=1, small_world_p=0.5
         )
-        env = GraphEnvironment(agent_class=SimpleAgent, config=config)
+        env = GraphEnvironment(config=config)
