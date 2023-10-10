@@ -9,7 +9,8 @@ fake = Faker()
 base_template = {
     "traits": {
         "personality": ["introvert", "extrovert"],
-        "temperament": ["melancholic", "choleric", "sanguine", "phlegmatic"],
+        "temperament": ["open-minded", "closed-minded"],
+        "leaning": ["liberal", "conservative", "independent"],
         "interests": [
             "sports",
             "music",

@@ -22,7 +22,11 @@ class SimpleAgent(BaseAgent):
         default_factory=lambda: ["Here is the conversation so far."]
     )
     persona: Optional[Persona] = None
-    # base_descriptor_system_message: SystemMessage = SystemMessage(content="")
+    base_descriptor_system_message: SystemMessage = SystemMessage(
+        content="""I want to create descriptions for different types of agents, based on their personas.  You should 
+        add the following information for the agent: 1. Educational status 2. Political beliefs on the following 
+        topics: - Abortion rights - Gun rights"""
+    )
     subject_description: str = (
         "You are an agent participating in a social dynamics simulation."
     )
@@ -54,7 +58,7 @@ class SimpleAgent(BaseAgent):
             self.persona = generate_persona(base_template)
             self.persona.name = self.name
         agent_specifier_prompt = [
-            # self.base_descriptor_system_message,
+            self.base_descriptor_system_message,
             HumanMessage(
                 content=f"""{self.subject_description}
                 Please provide a description for {self.persona.name}, a {self.persona.age}-year-old {self.persona.status} with {self.persona.traits} traits.
@@ -72,7 +76,7 @@ class SimpleAgent(BaseAgent):
             {self.subject_description}
             Your name is {self.name}. Your description is as follows: {agent_description}.
             You will be discussing the topic of {topic} and you will be able to present your views to the other agents.
-            You will also be able to respond to the views of the other agents.
+            You will also be able to respond to the views of the other agents. You are free to change your views. 
             Speak in the first person from the perspective of {self.name}.
             Do not change roles!
             Do not speak from the perspective of anyone else.

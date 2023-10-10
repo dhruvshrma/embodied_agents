@@ -1,8 +1,6 @@
 from pydantic import ValidationError
 import pytest
 from environments.GraphEnvironment import GraphEnvironment, GraphEnvironmentConfig
-from agents.base_agent import BaseAgent
-from agents.SimpleAgent import SimpleAgent
 from hypothesis import given
 from hypothesis.strategies import integers, floats
 

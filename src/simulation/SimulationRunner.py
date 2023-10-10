@@ -70,7 +70,7 @@ class SimulationRunner(BaseModel):
             small_world_k=config.small_world_k,
             small_world_p=config.small_world_p,
         )
-        env = GraphEnvironment(agent_class=SimpleAgent, config=env_config)
+        env = GraphEnvironment(config=env_config)
 
         agent_manager = AgentManager(
             num_agents=config.num_agents, agent_class=SimpleAgent
