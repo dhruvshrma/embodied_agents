@@ -28,7 +28,7 @@ def setup_graph_environment(request):
     config = GraphEnvironmentConfig(
         num_agents=7, topology=topology, small_world_k=2, small_world_p=0.3
     )
-    env = GraphEnvironment(agent_class=SimpleAgent, config=config)
+    env = GraphEnvironment(config=config)
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=temperature)
     for agent in env.agents:
         agent.model = llm
@@ -91,7 +91,6 @@ def test_run_with_mediator_injection(setup_graph_environment):
     runner.interaction_model.inject(None, "")
     runner.run_simulation()
 
-    # print(
     assert runner.interaction_model._step == runner.num_rounds
     assert len(runner.interaction_model.history) == runner.num_rounds + 1
     assert len(runner.interaction_model.agents) == env.config.num_agents
@@ -111,9 +110,6 @@ def test_simulation_runner_with_config():
     assert runner.interaction_model.environment.config.num_agents == 7
     for agent in runner.interaction_model.agents:
         assert agent.agent_description, "Agent description not set!"
-        # print(
-        #     f"Agent id : {agent.agent_id}, Agent name: {agent.name}, Agent description: {agent.agent_description}"
-        # )
     assert runner.interaction_model.topic == "A discussion on ice-cream flavors"
     assert runner.interaction_model._step == 0
     assert len(runner.interaction_model.history) == 0
@@ -129,7 +125,6 @@ def test_simulation_runner_with_config_and_local_model():
     )
 
     runner = SimulationRunner(config=config, interaction_model=DialogueSimulator)
-    # assert runner.num_rounds == 10
     assert runner.interaction_model.environment.config.num_agents == 7
     for agent in runner.interaction_model.environment.agents:
         assert agent.agent_description, "Agent description not set!"

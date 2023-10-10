@@ -44,9 +44,6 @@ class SimulationConfig(BaseModel):
 
 
 class SimulationRunner(BaseModel):
-    # def __init__(self, config: SimulationConfig):
-    #     self.config = config
-    #     self.interaction_model = None
     config: SimulationConfig
     interaction_model: Union[DialogueSimulator, VoterModel]
 
@@ -92,15 +89,10 @@ class SimulationRunner(BaseModel):
             agent.create_agent_description()
             agent.create_system_message(topic=config.topic)
 
-        # Initialize the mediating agent
-        # mediating_agent = MediatingAgent(name="Mediator", agent_id=-1)
         mediating_agent = AgentFactory.create_mediating_agent(topic=config.topic)
         mediating_agent.model = llm
         mediating_agent.set_system_message()
 
-        # print(f"I have reached here: {interaction_model is None}")
-
-        # Initialize the DialogueSimulation class and agent descriptions
         simulator = interaction_model(
             environment=env,
             mediating_agent=mediating_agent,
@@ -108,11 +100,7 @@ class SimulationRunner(BaseModel):
             selection_function=random_selector,
             topic=config.topic,
         )
-        # #
-
-        #
         cls.attach_agents_to_nodes(simulator.environment.graph, simulator.agents)
-        #
         return simulator
 
     def run_simulation(self):
