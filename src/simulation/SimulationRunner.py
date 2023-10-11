@@ -11,6 +11,7 @@ import networkx as nx
 
 from environments.GraphEnvironment import GraphEnvironment, GraphEnvironmentConfig
 from enum import Enum
+from utils.event_handler import EventHandler, AgentSpoke
 
 
 def random_selector(agents: List[SimpleAgent]) -> int:
@@ -21,6 +22,7 @@ def random_selector(agents: List[SimpleAgent]) -> int:
 class ModelType(str, Enum):
     MISTRAL = "mistral:latest"
     GPT3 = "gpt-3.5-turbo"
+    GPT3BIS = "gpt-3.5-turbo-16k"
     LLAMA2 = "llama2:13b-chat"
     LLAMA2BIS = "llama2-uncensored"
 
@@ -74,7 +76,10 @@ class SimulationRunner(BaseModel):
         )
 
         # Initialize the chat model
-        if config.model_type == ModelType.GPT3:
+        if (
+            config.model_type == ModelType.GPT3
+            or config.model_type == ModelType.GPT3BIS
+        ):
             from langchain.chat_models import ChatOpenAI
 
             llm = ChatOpenAI(model=config.model_type, temperature=config.temperature)
@@ -105,8 +110,12 @@ class SimulationRunner(BaseModel):
 
     def run_simulation(self):
         for i in range(self.config.num_rounds):
-            print("----")
-            print(f"Round {i}")
+            EventHandler.handle(
+                AgentSpoke(agent_name="SYSTEM", message=f"----\nRound {i+1}")
+            )
             name, message = self.interaction_model.step()
-            print(f"{name}: {message}")
-            print("----")
+            EventHandler.handle(AgentSpoke(agent_name=name, message=message))
+            EventHandler.handle(AgentSpoke(agent_name="SYSTEM", message="----"))
+        EventHandler.handle(
+            AgentSpoke(agent_name="SYSTEM", message="Simulation complete")
+        )
