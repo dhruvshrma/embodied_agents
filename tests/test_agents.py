@@ -69,3 +69,19 @@ def test_initialize_mediating_agent(language_model):
     print(agent.system_message)
     # agent.system_message = SystemMessage(content="Hello")
     # print(agent.send())
+
+
+def test_store_personal_message_history(language_model):
+    agent = SimpleAgent(
+        name="Mahler", system_message=None, model=language_model, agent_id=1
+    )
+
+    assert agent.agent_id == 1
+    assert agent.get_opinion() == 0
+    assert agent.personal_message_history == []
+    agent.create_agent_description()
+    agent.create_system_message(topic="A discussion on ice-cream flavors")
+
+    message = agent.send()
+
+    assert agent.personal_message_history == [message]

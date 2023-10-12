@@ -31,6 +31,7 @@ class SimpleAgent(BaseAgent):
         "You are an agent participating in a social dynamics simulation."
     )
     agent_description: Optional[str] = None
+    personal_message_history: List[str] = Field(default_factory=lambda: [])
 
     @root_validator(pre=True)
     def set_prefix(cls, values):
@@ -48,6 +49,7 @@ class SimpleAgent(BaseAgent):
                 HumanMessage(content="\n".join(self.message_history + [self.prefix])),
             ]
         )
+        self.personal_message_history.append(message.content)
         return message.content
 
     def receive(self, name: str, message: str) -> None:
