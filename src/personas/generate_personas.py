@@ -11,6 +11,11 @@ base_template = {
         "personality": ["introvert", "extrovert"],
         "temperament": ["open-minded", "closed-minded"],
         "leaning": ["liberal", "conservative", "independent"],
+        "opinions_description": [
+            "all opinions are strongly held, is stubborn minded",
+            "all opinions are weakly held, is susceptible to change",
+            "is fickle-minded, changes their mind often",
+        ],
         "interests": [
             "sports",
             "music",

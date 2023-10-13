@@ -12,6 +12,14 @@ from langchain.schema import (
     SystemMessage,
 )
 
+from configs.configs import LLMConfig, ModelType
+
+
+class ModelMissingError(Exception):
+    """Raised when the model_type is None"""
+
+    pass
+
 
 class SimpleAgent(BaseAgent):
     name: str
@@ -23,12 +31,12 @@ class SimpleAgent(BaseAgent):
     )
     persona: Optional[Persona] = None
     base_descriptor_system_message: SystemMessage = SystemMessage(
-        content="""I want to create descriptions for different types of agents, based on their personas.  You should 
+        content="""I want to create descriptions for different types of agent. Based on their personas, you should 
         add the following information for the agent: 1. Educational status 2. Political beliefs on the following 
         topics: - Abortion rights - Gun rights"""
     )
     subject_description: str = (
-        "You are an agent participating in a social dynamics simulation."
+        "You are a participant in a discussion with other people."
     )
     agent_description: Optional[str] = None
     personal_message_history: List[str] = Field(default_factory=lambda: [])
@@ -38,6 +46,25 @@ class SimpleAgent(BaseAgent):
         name = values.get("name")
         values["prefix"] = f"{name}: "
         return values
+
+    def set_model(self, model_config: LLMConfig):
+        if (
+            model_config.model_type == ModelType.GPT3
+            or model_config.model_type == ModelType.GPT3BIS
+        ):
+            optional_params = {
+                "frequency_penalty": model_config.frequency_penalty,
+                "presence_penalty": model_config.presence_penalty,
+            }
+            self.model = ChatOpenAI(
+                model=model_config.model_type,
+                temperature=model_config.temperature,
+                model_kwargs=optional_params,
+            )
+        else:
+            self.model = ChatOllama(
+                model=model_config.model_type, temperature=model_config.temperature
+            )
 
     def reset(self):
         self.message_history = ["Here is the conversation so far."]
@@ -67,6 +94,8 @@ class SimpleAgent(BaseAgent):
                 Do not add anything else."""
             ),
         ]
+        if self.model is None:
+            raise ModelMissingError("Model is not set")
         agent_description = self.model(agent_specifier_prompt).content
         self.agent_description = agent_description
 
@@ -81,9 +110,6 @@ class SimpleAgent(BaseAgent):
             You will also be able to respond to the views of the other agents. You are free to change your views. 
             Speak in the first person from the perspective of {self.name}.
             Do not change roles!
-            Do not speak from the perspective of anyone else.
-            Stop speaking the moment you finish speaking from your perspective.
-            Do not add anything else.
             """
         )
 
@@ -115,7 +141,8 @@ class MediatingAgent(SimpleAgent):
                 content=f"""Please describe the MediatingAgent's role and characteristics in this simulation in 100 words or less."""
             ),
         ]
-
+        if self.model is None:
+            raise ModelMissingError("Model is not set")
         mediating_agent_description = self.model(
             mediating_agent_specifier_prompt
         ).content

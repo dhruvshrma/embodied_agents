@@ -1,11 +1,11 @@
 from langchain.schema import SystemMessage
 
 from agents.base_agent import BaseAgent
-from agents.SimpleAgent import SimpleAgent, MediatingAgent
-from agents.GenerativeSocialAgent import GenerativeSocialAgent
+from agents.SimpleAgent import SimpleAgent, MediatingAgent, ModelMissingError
 import pytest
-from utils.log_config import setup_logging, print_to_log
-
+from utils.log_config import setup_logging
+from configs.configs import LLMConfig, ModelType
+from langchain.chat_models import ChatOllama, ChatOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,8 +14,6 @@ logger = setup_logging()
 
 @pytest.fixture
 def language_model():
-    from langchain.chat_models import ChatOllama, ChatOpenAI
-
     # llm = ChatOllama(
     #     model="llama2",
     #     temperature=0.0,
@@ -25,17 +23,19 @@ def language_model():
     return llm
 
 
+@pytest.fixture
+def llm_config():
+    config = LLMConfig(
+        model_type=ModelType.GPT3,
+        temperature=0.0,
+        presence_penalty=1.0,
+        frequency_penalty=1.0,
+    )
+    return config
+
+
 def test_agent_initialization():
     agent = BaseAgent(agent_id=1)
-    assert agent.agent_id == 1
-    assert agent.get_opinion() == 0
-
-
-def test_initialize_social_agent():
-    agent = GenerativeSocialAgent(
-        agent_id=1, name="Mahler", age=30, status="single", traits="obnoxious"
-    )
-
     assert agent.agent_id == 1
     assert agent.get_opinion() == 0
 
@@ -85,3 +85,23 @@ def test_store_personal_message_history(language_model):
     message = agent.send()
 
     assert agent.personal_message_history == [message]
+
+
+def test_agent_model_initialization(llm_config):
+    agent = SimpleAgent(name="Mahler", system_message=None, model=None, agent_id=1)
+
+    agent.set_model(llm_config)
+
+    assert agent.model is not None
+    assert isinstance(agent.model, ChatOpenAI)
+
+    assert agent.model.model_kwargs != {}
+    assert agent.model.model_kwargs["presence_penalty"] == 1.0
+    assert agent.model.model_kwargs["frequency_penalty"] == 1.0
+
+
+def test_throw_error_without_model_set():
+    agent = SimpleAgent(name="Mahler", system_message=None, model=None, agent_id=1)
+
+    with pytest.raises(ModelMissingError):
+        agent.create_agent_description()

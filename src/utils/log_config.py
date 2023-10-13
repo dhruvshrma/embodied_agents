@@ -4,7 +4,15 @@ import logging
 import datetime
 
 
-def setup_logging():
+def generate_filename_with_date(name: str, extension: str = ".log") -> str:
+    today = datetime.datetime.now()
+    formatted_date = today.strftime("%d_%m_%Y")
+    return f"{name}_{formatted_date}{extension}"
+
+
+def setup_logging(
+    app_file_name: str = "app.log", simulation_file_name: str = "simulation.log"
+):
     """Sets up logging configuration."""
     # Define the structured format for the logs
     log_format = (
@@ -15,7 +23,7 @@ def setup_logging():
     logging.basicConfig(level=logging.DEBUG, format=log_format)
 
     # Create a file handler that logs everything to a file
-    file_handler = logging.FileHandler("app.log")
+    file_handler = logging.FileHandler(app_file_name)
     file_handler.setLevel(logging.DEBUG)  # Log everything to the file
     file_handler.setFormatter(logging.Formatter(log_format))
 
@@ -24,7 +32,7 @@ def setup_logging():
     stream_handler.setLevel(logging.ERROR)  # Only log errors to stdout for pytest
     stream_handler.setFormatter(logging.Formatter(log_format))
 
-    info_file_handler = logging.FileHandler("simulation.log")
+    info_file_handler = logging.FileHandler(simulation_file_name)
     info_file_handler.setLevel(logging.INFO)  # Log everything to the file
     info_file_handler.setFormatter(logging.Formatter(log_format))
 

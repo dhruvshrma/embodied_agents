@@ -9,40 +9,20 @@ from simulation.AgentFactory import AgentFactory
 from simulation.AgentManager import AgentManager
 import networkx as nx
 
-from environments.GraphEnvironment import GraphEnvironment, GraphEnvironmentConfig
-from enum import Enum
+from environments.GraphEnvironment import GraphEnvironment
+from configs.configs import (
+    GraphEnvironmentConfig,
+    TopologyType,
+    LLMConfig,
+    ModelType,
+    SimulationConfig,
+)
 from utils.event_handler import EventHandler, AgentSpoke
 
 
 def random_selector(agents: List[SimpleAgent]) -> int:
     """A simple selector function that chooses an agent at random."""
     return random.choice(range(len(agents)))
-
-
-class ModelType(str, Enum):
-    MISTRAL = "mistral:latest"
-    GPT3 = "gpt-3.5-turbo"
-    GPT3BIS = "gpt-3.5-turbo-16k"
-    LLAMA2 = "llama2:13b-chat"
-    LLAMA2BIS = "llama2-uncensored"
-
-
-class TopologyType(str, Enum):
-    SMALL_WORLD = "small-world"
-    STAR = "star"
-    SCALE_FREE = "scale-free"
-
-
-class SimulationConfig(BaseModel):
-    num_agents: int
-    topic: str
-    num_rounds: int
-    topology: TopologyType = TopologyType.SMALL_WORLD
-    model_type: ModelType = ModelType.GPT3
-
-    temperature: float = 1.0
-    small_world_k: int = 4
-    small_world_p: float = 0.3
 
 
 class SimulationRunner(BaseModel):
@@ -75,27 +55,31 @@ class SimulationRunner(BaseModel):
             num_agents=config.num_agents, agent_class=SimpleAgent
         )
 
+        llm_config = LLMConfig(
+            model_type=config.model_type, temperature=config.temperature
+        )
+
         # Initialize the chat model
-        if (
-            config.model_type == ModelType.GPT3
-            or config.model_type == ModelType.GPT3BIS
-        ):
-            from langchain.chat_models import ChatOpenAI
-
-            llm = ChatOpenAI(model=config.model_type, temperature=config.temperature)
-        else:
-            from langchain.chat_models import ChatOllama
-
-            llm = ChatOllama(model=config.model_type, temperature=config.temperature)
+        # if (
+        #     config.model_type == ModelType.GPT3
+        #     or config.model_type == ModelType.GPT3BIS
+        # ):
+        #     from langchain.chat_models import ChatOpenAI
+        #
+        #     llm = ChatOpenAI(model=config.model_type, temperature=config.temperature)
+        # else:
+        #     from langchain.chat_models import ChatOllama
+        #
+        #     llm = ChatOllama(model=config.model_type, temperature=config.temperature)
 
         # Set the model for the agents
         for agent in agent_manager.agents:
-            agent.model = llm
+            agent.set_model(llm_config)
             agent.create_agent_description()
             agent.create_system_message(topic=config.topic)
 
         mediating_agent = AgentFactory.create_mediating_agent(topic=config.topic)
-        mediating_agent.model = llm
+        mediating_agent.set_model(llm_config)
         mediating_agent.set_system_message()
 
         simulator = interaction_model(

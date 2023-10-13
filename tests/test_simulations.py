@@ -2,7 +2,6 @@ import pytest
 from simulation.SimulationRunner import (
     SimulationRunner,
     random_selector,
-    SimulationConfig,
     ModelType,
     TopologyType,
 )
@@ -12,6 +11,8 @@ from agents.SimpleAgent import SimpleAgent, MediatingAgent
 from interactions.DialogueSimulation import DialogueSimulator
 from rich import print
 from dotenv import load_dotenv
+
+from configs.configs import SimulationConfig
 
 load_dotenv()
 params = [
@@ -126,7 +127,7 @@ def test_simulation_runner_with_config_and_local_model():
 
     runner = SimulationRunner(config=config, interaction_model=DialogueSimulator)
     assert runner.interaction_model.environment.config.num_agents == 7
-    for agent in runner.interaction_model.environment.agents:
+    for agent in runner.interaction_model.agents:
         assert agent.agent_description, "Agent description not set!"
         assert agent.model is not None
         assert agent.model == ChatOllama(model="llama2:13b-chat", temperature=1.0)
