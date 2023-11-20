@@ -54,16 +54,3 @@ MODEL_MAP = {
         Ollama_init_func,
     ),
 }
-
-
-def language_model_and_memory(model_name: str = "gpt-3.5-turbo"):
-    module, init_func = MODEL_MAP.get(model_name, (None, None))
-    if module is None or init_func is None:
-        raise ValueError(f"Unsupported model name: {model_name}")
-
-    llm = init_func(model_name=model_name)
-
-    memory = GenerativeAgentMemory(
-        llm=llm, memory_retriever=create_new_memory_retriever(), reflection_threshold=8
-    )
-    return llm, memory

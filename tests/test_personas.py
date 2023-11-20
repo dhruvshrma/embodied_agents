@@ -4,7 +4,6 @@ from personas.generate_personas import generate_persona
 from personas.Persona import Persona
 
 
-# add template as pytest fixture
 @pytest.fixture
 def template():
     template = {
