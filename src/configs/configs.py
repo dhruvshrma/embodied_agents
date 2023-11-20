@@ -62,7 +62,7 @@ class GraphEnvironmentConfig(BaseModel):
         num_agents = values.get("num_agents")
 
         if topology == "small-world":
-            if num_agents is not None:  # Ensure num_agents has been processed
+            if num_agents is not None:
                 if num_agents <= k:
                     raise ValueError("num_agents must be greater than small_world_k")
                 elif k < 2:

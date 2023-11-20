@@ -1,5 +1,3 @@
-# log_config.py
-
 import logging
 import datetime
 
@@ -47,7 +45,6 @@ def setup_logging(
 
 
 def log_config(config: dict):
-    """Logs the provided configuration."""
     logger = logging.getLogger()
     formatted_config = "\n".join([f"{key}: {value}" for key, value in config.items()])
     logger.info(f"Simulation Configuration:\n{formatted_config}")
@@ -59,7 +56,6 @@ def log_simulation_start():
 
 
 def print_to_log(*args, **kwargs):
-    """Custom print function to log instead of printing to stdout."""
     logger = logging.getLogger()
     # logger.info(" ".join(map(str, args)))
     logger.info(*args, **kwargs)
