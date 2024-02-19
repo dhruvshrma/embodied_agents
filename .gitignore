@@ -8,3 +8,12 @@ notes.md
 
 .env
 running_notes.md
+
+.hypothesis
+
+*.log
+presentation_script.md
+.vscode
+data
+.idea
+notebooks
