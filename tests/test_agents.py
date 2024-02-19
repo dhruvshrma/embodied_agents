@@ -5,7 +5,7 @@ from agents.SimpleAgent import SimpleAgent, MediatingAgent, ModelMissingError
 import pytest
 from utils.log_config import setup_logging
 from configs.configs import LLMConfig, ModelType
-from langchain.chat_models import ChatOllama, ChatOpenAI
+from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
