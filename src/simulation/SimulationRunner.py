@@ -1,5 +1,5 @@
 import random
-from typing import List, Union, Any
+from typing import List, Union
 from pydantic import BaseModel, validator
 from agents.SimpleAgent import SimpleAgent
 from agents.base_agent import BaseAgent
@@ -12,9 +12,7 @@ import networkx as nx
 from environments.GraphEnvironment import GraphEnvironment
 from configs.configs import (
     GraphEnvironmentConfig,
-    TopologyType,
     LLMConfig,
-    ModelType,
     SimulationConfig,
 )
 from utils.event_handler import EventHandler, AgentSpoke

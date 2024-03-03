@@ -19,5 +19,5 @@ We also provide a series of tests within the `tests` folder. These can be run us
 ## TODOs 
 
 - [ ] Add code for the calculations for similarity in opinions. 
-- [ ] Add example notebook for showing a complete simulation. 
+- [X] Add example notebook for showing a complete simulation. 
 
