@@ -4,6 +4,8 @@ from agents.base_agent import BaseAgent
 from interactions.VoterModel import VoterModel
 from interactions.DialogueSimulation import DialogueSimulator
 from environments.GraphEnvironment import GraphEnvironment, GraphEnvironmentConfig
+from configs.configs import ModelType, LLMConfig
+from simulation.AgentFactory import AgentFactory
 from agents.SimpleAgent import SimpleAgent
 from langchain.chat_models import ChatOpenAI
 from typing import List
@@ -34,27 +36,38 @@ def setup_graph_environment():
     config = GraphEnvironmentConfig(
         num_agents=3, topology="star", small_world_k=2, small_world_p=0.3
     )
-    env = GraphEnvironment(agent_class=SimpleAgent, config=config)
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
-    for agent in env.agents:
-        agent.model = llm
-    sim = DialogueSimulator(environment=env, selection_function=random_selector)
-
-    return env, sim
+    llm_config = LLMConfig(model_type=ModelType.GPT3, temperature=0.0)
+    env = GraphEnvironment(config=config)
+    agents= [AgentFactory.create_testuser_agent(agent_id=0)]
+    for i in range(1, config.num_agents):
+        agents.append(AgentFactory.create_random_agent(agent_id=i))
+    for agent in agents:
+        agent.set_model(llm_config)
+    sim = DialogueSimulator(environment=env, selection_function=random_selector,
+                            agents=agents) 
+    
+    for i, agent in enumerate(agents):
+            env.graph.nodes[i]["agent"] = agent
+                            
+    return env, sim 
 
 
 def test_initialization(setup_graph_environment):
-    env, sim = setup_graph_environment
-    assert sim._step == 0
-    assert len(sim.agents) == env.config.num_agents
+    env, sim  = setup_graph_environment
+    assert sim.environment == env
     assert sim.select_next_speaker == random_selector
     assert len(sim.history) == 0
-
+    assert sim.agents[0].name == "TestUser"
+    assert sim.agents[0].agent_id == 0
+    
+    for agent in sim.agents:
+        assert agent.model is not None
+        assert isinstance(agent.model, ChatOpenAI)
 
 def test_inject(setup_graph_environment):
     env, sim = setup_graph_environment
 
-    sim.inject("TestUser", "Hello agents!")
+    sim.inject(idx=0, message="Hello agents!")
     for agent in sim.agents:
         assert agent.message_history[-1] == "TestUser: Hello agents!"
 
@@ -70,7 +83,7 @@ def test_step(setup_graph_environment):
 def test_reset(setup_graph_environment):
     env, sim = setup_graph_environment
 
-    sim.inject("TestUser", "Hello agents!")
+    sim.inject(idx=0, message = "Hello agents!")
     sim.step()
     sim.reset()
 

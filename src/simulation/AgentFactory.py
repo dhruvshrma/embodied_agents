@@ -24,3 +24,7 @@ class AgentFactory:
     def create_random_agent(agent_id: int) -> SimpleAgent:
         random_persona = generate_persona(base_template)
         return AgentFactory.create_simple_agent(random_persona, agent_id=agent_id)
+    
+    @staticmethod
+    def create_testuser_agent(agent_id: int) -> SimpleAgent:
+        return SimpleAgent(name="TestUser", agent_id=agent_id)

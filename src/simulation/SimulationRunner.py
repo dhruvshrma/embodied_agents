@@ -1,7 +1,7 @@
 import random
 from typing import List, Union, Any
-from pydantic import BaseModel, Field, validator, constr
-from agents.SimpleAgent import SimpleAgent, MediatingAgent
+from pydantic import BaseModel, validator
+from agents.SimpleAgent import SimpleAgent
 from agents.base_agent import BaseAgent
 from interactions.DialogueSimulation import DialogueSimulator
 from interactions.VoterModel import VoterModel
