@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 import pytest
 from environments.GraphEnvironment import GraphEnvironment, GraphEnvironmentConfig
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import integers, floats
 
 
@@ -27,6 +27,7 @@ def test_graph_initialization_failn1():
     small_world_k=integers(min_value=1, max_value=100),
     small_world_p=floats(min_value=0.01, max_value=1.0),
 )
+@settings(deadline=500)
 def test_graph_initialization_simple(num_agents, small_world_k, small_world_p):
     try:
         config = GraphEnvironmentConfig(

@@ -84,7 +84,7 @@ def test_reset(setup_graph_environment):
     env, sim = setup_graph_environment
 
     sim.inject(idx=0, message = "Hello agents!")
-    sim.step()
+    name, message = sim.step()
     sim.reset()
 
     assert sim._step == 0
