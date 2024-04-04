@@ -15,7 +15,7 @@ Babel @ file:///home/conda/feedstock_root/build_artifacts/babel_1677767029043/wo
 backcall @ file:///home/conda/feedstock_root/build_artifacts/backcall_1592338393461/work
 backports.functools-lru-cache @ file:///home/conda/feedstock_root/build_artifacts/backports.functools_lru_cache_1687772187254/work
 beautifulsoup4 @ file:///home/conda/feedstock_root/build_artifacts/beautifulsoup4_1680888073205/work
-black==23.9.1
+black==24.3.0
 bleach @ file:///home/conda/feedstock_root/build_artifacts/bleach_1674535352125/work
 Brotli @ file:///Users/runner/miniforge3/conda-bld/brotli-split_1693583678882/work
 cached-property @ file:///home/conda/feedstock_root/build_artifacts/cached_property_1615209429212/work
