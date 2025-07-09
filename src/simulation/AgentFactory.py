@@ -1,8 +1,7 @@
 from agents.SimpleAgent import SimpleAgent, MediatingAgent
 from personas.generate_personas import generate_persona, base_template
 from personas.Persona import Persona
-from typing import Union
-from langchain.chat_models import ChatOpenAI, ChatOllama
+from src.llm.base import LLMClient
 
 
 class AgentFactory:
@@ -13,7 +12,7 @@ class AgentFactory:
 
     @staticmethod
     def create_mediating_agent(
-        topic: str, model: Union[ChatOpenAI, ChatOllama] = None
+        topic: str, model: LLMClient = None
     ) -> MediatingAgent:
         agent = MediatingAgent(name="Mediator", topic=topic, agent_id=-1, model=model)
         if model is not None:

@@ -1,11 +1,9 @@
-from langchain.schema import SystemMessage
-
 from agents.base_agent import BaseAgent
 from agents.SimpleAgent import SimpleAgent, MediatingAgent, ModelMissingError
 import pytest
 from utils.log_config import setup_logging
 from configs.configs import LLMConfig, ModelType
-from langchain.chat_models import ChatOpenAI
+from src.llm.openai_client import OpenAIClient
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,12 +12,7 @@ logger = setup_logging()
 
 @pytest.fixture
 def language_model():
-    # llm = ChatOllama(
-    #     model="llama2",
-    #     temperature=0.0,
-    #     callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
-    # )
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
+    llm = OpenAIClient(model="gpt-3.5-turbo", temperature=0.0)
     return llm
 
 
@@ -50,7 +43,7 @@ def test_initialize_simple_agent(language_model):
     assert agent.system_message is None
     assert agent.message_history == ["Here is the conversation so far."]
     assert agent.prefix == "Mahler: "
-    agent.system_message = SystemMessage(content="Hello")
+    agent.system_message = "Hello"
     print(agent.send())
 
 
@@ -67,7 +60,7 @@ def test_initialize_mediating_agent(language_model):
     print(agent.system_message)
     agent.set_system_message()
     print(agent.system_message)
-    # agent.system_message = SystemMessage(content="Hello")
+    # agent.system_message = "Hello"
     # print(agent.send())
 
 
@@ -93,11 +86,10 @@ def test_agent_model_initialization(llm_config):
     agent.set_model(llm_config)
 
     assert agent.model is not None
-    assert isinstance(agent.model, ChatOpenAI)
+    assert isinstance(agent.model, OpenAIClient)
 
-    assert agent.model.model_kwargs != {}
-    assert agent.model.model_kwargs["presence_penalty"] == 1.0
-    assert agent.model.model_kwargs["frequency_penalty"] == 1.0
+    assert agent.model.model == "gpt-3.5-turbo"
+    assert agent.model.temperature == 0.0
 
 
 def test_throw_error_without_model_set():

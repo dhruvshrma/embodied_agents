@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "embodied-agents"
+version = "0.1.0"
+description = ""
+authors = ["Dhruv Sharma <dhruv.sharma@polytechnique.org>"]
+readme = "README.md"
+packages = [{include = "**/*.py", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pytest = "^8.2.2"
+pydantic = "^2.7.4"
+faker = "^25.8.0"
+networkx = "^3.3"
+plotly = "^5.22.0"
+python-dotenv = "^1.0.1"
+openai = "0.28.1"
+hypothesis="6.87.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

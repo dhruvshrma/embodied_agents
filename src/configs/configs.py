@@ -1,5 +1,6 @@
 from enum import Enum
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator, ConfigDict
+from typing import Any, Dict
 
 
 class ModelType(str, Enum):
@@ -29,6 +30,8 @@ class SimulationConfig(BaseModel):
 
 
 class LLMConfig(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    
     model_type: ModelType = ModelType.GPT3BIS
     temperature: float = 1.0
     presence_penalty: float = 1.0
@@ -42,21 +45,25 @@ class GraphEnvironmentConfig(BaseModel):
     small_world_p: float = 0.3
     scale_free_m: int = 1
 
-    @validator("topology")
+    @field_validator("topology")
+    @classmethod
     def validate_topology(cls, value):
         valid_topologies = ["star", "small-world", "scale-free"]
         if value not in valid_topologies:
             raise ValueError(f"Invalid topology. Choose from {valid_topologies}")
         return value
 
-    @validator("num_agents", pre=True)
+    @field_validator("num_agents", mode='before')
+    @classmethod
     def validate_num_agents(cls, value):
         if value <= 1:
             raise ValueError("num_agents must be greater than 1")
         return value
 
-    @validator("small_world_k", pre=True, always=True)
-    def validate_small_world_k(cls, k, values):
+    @field_validator("small_world_k", mode='before')
+    @classmethod
+    def validate_small_world_k(cls, k, info):
+        values = info.data if info.data else {}
         topology = values.get("topology")
         num_agents = values.get("num_agents")
 
@@ -70,13 +77,15 @@ class GraphEnvironmentConfig(BaseModel):
                     raise ValueError("For num_agents=2, small_world_k cannot be 1")
         return k
 
-    @validator("small_world_p")
+    @field_validator("small_world_p")
+    @classmethod
     def validate_small_world_p(cls, value):
         if not (0 <= value <= 1):
             raise ValueError("small_world_p must be between 0 and 1")
         return value
 
-    @validator("scale_free_m")
+    @field_validator("scale_free_m")
+    @classmethod
     def validate_scale_free_m(cls, value):
         if value <= 0:
             raise ValueError("scale_free_m must be greater than 0")

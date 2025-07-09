@@ -1,6 +1,6 @@
 import random
 from typing import List, Union
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator, ConfigDict
 from agents.SimpleAgent import SimpleAgent
 from agents.base_agent import BaseAgent
 from interactions.DialogueSimulation import DialogueSimulator
@@ -24,11 +24,10 @@ def random_selector(agents: List[SimpleAgent]) -> int:
 
 
 class SimulationRunner(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
     config: SimulationConfig
     interaction_model: Union[DialogueSimulator, VoterModel]
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @staticmethod
     def attach_agents_to_nodes(
@@ -37,8 +36,10 @@ class SimulationRunner(BaseModel):
         for i, agent in enumerate(agents):
             graph.nodes[i]["agent"] = agent
 
-    @validator("interaction_model", pre=True, always=True)
-    def validate_interaction_model(cls, interaction_model, values):
+    @field_validator("interaction_model", mode='before')
+    @classmethod
+    def validate_interaction_model(cls, interaction_model, info):
+        values = info.data if info.data else {}
         config = values.get("config")
         # Initialize the graph environment
         env_config = GraphEnvironmentConfig(
