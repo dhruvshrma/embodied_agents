@@ -10,17 +10,17 @@ base_template = {
     "traits": {
         "personality": ["introvert", "extrovert"],
         "temperament": ["open-minded", "closed-minded"],
-        "leaning": ["liberal", "conservative", "independent"],
+        "change_orientation": ["change-oriented", "status-quo", "flexible"],
         "opinions_description": [
-            "all opinions are strongly held, is stubborn minded",
-            "all opinions are weakly held, is susceptible to change",
-            "is fickle-minded, changes their mind often",
+            "strongly held",
+            "weakly held",
+            "fickle-minded",
         ],
         "interests": [
             "sports",
             "music",
             "art",
-            "politics",
+            "policy",
             "science",
             "technology",
         ],

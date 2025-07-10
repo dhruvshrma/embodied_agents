@@ -177,7 +177,7 @@ class InteractiveSimulationRunner:
     def print_simulation_summary(self):
         """Print summary statistics."""
         print(f"\n{ColoredOutput.BOLD}{ColoredOutput.CYAN}📊 SIMULATION SUMMARY{ColoredOutput.RESET}")
-        print(f"{ColoredOutput.CYAN}{'='*40}{ColoredOutput.RESET}")
+        print(f"{ColoredOutput.CYAN}{'='*60}{ColoredOutput.RESET}")
         print(f"  Completed rounds: {ColoredOutput.GREEN}{self.round_count}{ColoredOutput.RESET}")
         print(f"  Total agents: {ColoredOutput.BLUE}{len(self.runner.interaction_model.agents)}{ColoredOutput.RESET}")
         
@@ -187,6 +187,83 @@ class InteractiveSimulationRunner:
             print(f"  Total messages: {ColoredOutput.YELLOW}{len(history)}{ColoredOutput.RESET}")
         
         print(f"  Topic: {ColoredOutput.MAGENTA}{self.config.topic}{ColoredOutput.RESET}")
+        
+        # Show opinion dynamics if available
+        self.print_opinion_summary()
+    
+    def print_opinion_summary(self):
+        """Print agent opinions summary table."""
+        print(f"\n{ColoredOutput.BOLD}{ColoredOutput.CYAN}🧠 AGENT OPINIONS SUMMARY{ColoredOutput.RESET}")
+        print(f"{ColoredOutput.CYAN}{'='*60}{ColoredOutput.RESET}")
+        
+        agents = self.runner.interaction_model.agents
+        
+        # Print table header
+        print(f"{ColoredOutput.BOLD}{'Agent Name':<15} {'Opinion':<10} {'Tendency':<15} {'Traits':<25}{ColoredOutput.RESET}")
+        print(f"{ColoredOutput.CYAN}{'-'*65}{ColoredOutput.RESET}")
+        
+        for agent in agents:
+            color = self.agent_colors.get(agent.name, ColoredOutput.WHITE)
+            opinion = agent.get_opinion()
+            
+            # Determine opinion tendency
+            if opinion < -0.3:
+                tendency = "Change-Oriented"
+                tendency_color = ColoredOutput.GREEN
+            elif opinion > 0.3:
+                tendency = "Status-Quo"
+                tendency_color = ColoredOutput.RED
+            else:
+                tendency = "Neutral"
+                tendency_color = ColoredOutput.YELLOW
+            
+            # Format opinion value
+            opinion_str = f"{opinion:+.2f}"
+            
+            # Truncate traits for display
+            traits = ""
+            if hasattr(agent, 'persona') and agent.persona and agent.persona.traits:
+                traits = agent.persona.traits[:22] + "..." if len(agent.persona.traits) > 25 else agent.persona.traits
+            
+            print(f"{color}{agent.name:<15}{ColoredOutput.RESET} "
+                  f"{opinion_str:<10} "
+                  f"{tendency_color}{tendency:<15}{ColoredOutput.RESET} "
+                  f"{traits:<25}")
+        
+        # Print opinion statistics
+        opinions = [agent.get_opinion() for agent in agents]
+        avg_opinion = sum(opinions) / len(opinions)
+        opinion_range = max(opinions) - min(opinions)
+        
+        print(f"\n{ColoredOutput.BOLD}Opinion Statistics:{ColoredOutput.RESET}")
+        print(f"  Average Opinion: {ColoredOutput.CYAN}{avg_opinion:+.3f}{ColoredOutput.RESET}")
+        print(f"  Opinion Range: {ColoredOutput.YELLOW}{opinion_range:.3f}{ColoredOutput.RESET}")
+        
+        # Show polarization level
+        if opinion_range > 1.0:
+            polarization = "High"
+            polar_color = ColoredOutput.RED
+        elif opinion_range > 0.5:
+            polarization = "Medium"
+            polar_color = ColoredOutput.YELLOW
+        else:
+            polarization = "Low"
+            polar_color = ColoredOutput.GREEN
+        
+        print(f"  Polarization: {polar_color}{polarization}{ColoredOutput.RESET}")
+        
+        # Show topology-specific insights
+        topology = self.config.topology if hasattr(self.config, 'topology') else "unknown"
+        print(f"\n{ColoredOutput.BOLD}Network Effect ({topology}):{ColoredOutput.RESET}")
+        
+        if hasattr(self.runner.interaction_model, 'opinion_analyzer'):
+            if self.runner.interaction_model.opinion_analyzer:
+                update_freq = self.runner.interaction_model.opinion_analyzer.update_frequency
+                print(f"  Opinion updates occurred every {ColoredOutput.BLUE}{update_freq}{ColoredOutput.RESET} rounds")
+            else:
+                print(f"  {ColoredOutput.YELLOW}No opinion tracking configured{ColoredOutput.RESET}")
+        else:
+            print(f"  {ColoredOutput.YELLOW}Opinion analyzer not available{ColoredOutput.RESET}")
 
 def create_config_from_args(args) -> SimulationConfig:
     """Create simulation configuration from command line arguments."""
@@ -213,7 +290,8 @@ def create_config_from_args(args) -> SimulationConfig:
         num_rounds=args.rounds,
         model_type=model_type,
         topology=topology,
-        temperature=args.temperature
+        temperature=args.temperature,
+        opinion_update_frequency=args.opinion_frequency
     )
 
 def main():
@@ -226,6 +304,7 @@ Examples:
   %(prog)s --topic "climate change" --agents 5 --rounds 10
   %(prog)s --topic "AI ethics" --model gpt-3.5-turbo --topology star
   %(prog)s --topic "philosophy" --agents 3 --rounds 5 --temperature 0.7
+  %(prog)s --topic "technology adoption" --agents 4 --rounds 15 --opinion-frequency 3
         """
     )
     
@@ -244,6 +323,8 @@ Examples:
                        help='Network topology (default: star)')
     parser.add_argument('--temperature', type=float, default=0.7,
                        help='LLM temperature (default: 0.7)')
+    parser.add_argument('--opinion-frequency', type=int, default=5,
+                       help='Update agent opinions every N rounds (default: 5)')
     
     # Parse arguments
     args = parser.parse_args()

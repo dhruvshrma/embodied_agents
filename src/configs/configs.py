@@ -27,6 +27,7 @@ class SimulationConfig(BaseModel):
     temperature: float = 1.0
     small_world_k: int = 4
     small_world_p: float = 0.3
+    opinion_update_frequency: int = 5
 
 
 class LLMConfig(BaseModel):

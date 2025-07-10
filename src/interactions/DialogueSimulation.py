@@ -11,6 +11,7 @@ class DialogueSimulator:
         agents: List[SimpleAgent],
         mediating_agent: Optional[MediatingAgent] = None,
         topic: str = "",
+        opinion_analyzer: Optional['OpinionAnalyzer'] = None,
     ) -> None:
         self.environment = environment
         self.agents = agents
@@ -19,6 +20,7 @@ class DialogueSimulator:
 
         self.select_next_speaker = selection_function
         self.history = []
+        self.opinion_analyzer = opinion_analyzer
 
         if mediating_agent:
             self.mediating_agent = mediating_agent
@@ -71,8 +73,25 @@ class DialogueSimulator:
         # 5. Increment time step
         self._step += 1
 
+        # 6. Opinion dynamics update (if analyzer is configured)
+        if self.opinion_analyzer and self.opinion_analyzer.should_update_opinions(self._step):
+            recent_history = self.get_recent_history(window=5)
+            self.opinion_analyzer.analyze_opinion_changes(recent_history, self.agents)
+
         return speaker.name, message
 
     def _log_interaction(self, name: str, message: str):
         """Log interactions for future analysis."""
         self.history.append((self._step, name, message))
+    
+    def get_recent_history(self, window: int = 5) -> List[Tuple]:
+        """
+        Get recent conversation history for opinion analysis.
+        
+        Args:
+            window: Number of recent interactions to return
+            
+        Returns:
+            List of recent (step, speaker_name, message) tuples
+        """
+        return self.history[-window:] if len(self.history) >= window else self.history

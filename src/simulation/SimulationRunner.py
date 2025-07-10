@@ -16,6 +16,7 @@ from configs.configs import (
     SimulationConfig,
 )
 from utils.event_handler import EventHandler, AgentSpoke
+from opinion_dynamics.OpinionAnalyzer import OpinionAnalyzer
 
 
 def random_selector(agents: List[SimpleAgent]) -> int:
@@ -81,12 +82,38 @@ class SimulationRunner(BaseModel):
         mediating_agent.set_model(llm_config)
         mediating_agent.set_system_message()
 
+        # Create OpinionAnalyzer for tracking opinion dynamics
+        opinion_analyzer = OpinionAnalyzer(
+            llm_client=None,  # Will be set based on model type
+            update_frequency=config.opinion_update_frequency
+        )
+        
+        # Set the appropriate LLM client for opinion analysis
+        if config.model_type.value in ["gpt-3.5-turbo", "gpt-3.5-turbo-16k"]:
+            from src.llm.openai_client import OpenAIClient
+            opinion_analyzer.llm_client = OpenAIClient(
+                model=config.model_type.value,
+                temperature=0.3  # Lower temperature for more consistent opinion analysis
+            )
+        else:
+            from src.llm.ollama_client import OllamaClient
+            opinion_analyzer.llm_client = OllamaClient(
+                model=config.model_type.value,
+                temperature=0.3
+            )
+
+        # Initialize agent opinions from personas
+        for agent in agent_manager.agents:
+            initial_opinion = opinion_analyzer.initialize_opinion_from_persona(agent)
+            agent.set_opinion(initial_opinion)
+
         simulator = interaction_model(
             environment=env,
             mediating_agent=mediating_agent,
             agents=agent_manager.agents,
             selection_function=random_selector,
             topic=config.topic,
+            opinion_analyzer=opinion_analyzer,
         )
         cls.attach_agents_to_nodes(simulator.environment.graph, simulator.agents)
         return simulator
