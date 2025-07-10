@@ -78,11 +78,3 @@ python -m venv env
 pip install -r requirements.txt
 ```
 
-6. Now, you can run the code.
-
----
-## TODOs 
-
-- [ ] Add code for the calculations for similarity in opinions. 
-- [X] Add example notebook for showing a complete simulation. 
-
