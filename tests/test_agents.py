@@ -3,7 +3,7 @@ from agents.SimpleAgent import SimpleAgent, MediatingAgent, ModelMissingError
 import pytest
 from utils.log_config import setup_logging
 from configs.configs import LLMConfig, ModelType
-from src.llm.openai_client import OpenAIClient
+from llm.openai_client import OpenAIClient
 from dotenv import load_dotenv
 
 load_dotenv()

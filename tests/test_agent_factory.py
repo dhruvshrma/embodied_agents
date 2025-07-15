@@ -1,5 +1,5 @@
 from simulation.AgentFactory import AgentFactory
-from src.llm.openai_client import OpenAIClient
+from llm.openai_client import OpenAIClient
 
 from dotenv import load_dotenv
 

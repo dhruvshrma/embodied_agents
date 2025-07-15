@@ -1,6 +1,8 @@
 import os
 import openai
-from src.llm.base import LLMClient
+from abc import ABC, abstractmethod
+from .base import LLMClient
+
 
 class OpenAIClient(LLMClient):
     def __init__(self, model: str = "gpt-3.5-turbo", temperature: float = 0.7):

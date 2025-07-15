@@ -32,7 +32,7 @@ class SimulationConfig(BaseModel):
 
 class LLMConfig(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
-    
+
     model_type: ModelType = ModelType.GPT3BIS
     temperature: float = 1.0
     presence_penalty: float = 1.0
@@ -54,14 +54,14 @@ class GraphEnvironmentConfig(BaseModel):
             raise ValueError(f"Invalid topology. Choose from {valid_topologies}")
         return value
 
-    @field_validator("num_agents", mode='before')
+    @field_validator("num_agents", mode="before")
     @classmethod
     def validate_num_agents(cls, value):
         if value <= 1:
             raise ValueError("num_agents must be greater than 1")
         return value
 
-    @field_validator("small_world_k", mode='before')
+    @field_validator("small_world_k", mode="before")
     @classmethod
     def validate_small_world_k(cls, k, info):
         values = info.data if info.data else {}

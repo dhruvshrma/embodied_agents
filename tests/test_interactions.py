@@ -5,8 +5,8 @@ from agents.SimpleAgent import SimpleAgent, MediatingAgent
 from simulation.AgentManager import AgentManager
 from interactions.DialogueSimulation import DialogueSimulator
 from environments.GraphEnvironment import GraphEnvironment
-from configs.configs import GraphEnvironmentConfig, LLMConfig, ModelType
-from src.llm.openai_client import OpenAIClient
+from configs.configs import LLMConfig, ModelType, GraphEnvironmentConfig
+from llm.openai_client import OpenAIClient
 from dotenv import load_dotenv
 
 load_dotenv()

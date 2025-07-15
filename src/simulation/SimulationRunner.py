@@ -26,7 +26,7 @@ def random_selector(agents: List[SimpleAgent]) -> int:
 
 class SimulationRunner(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     config: SimulationConfig
     interaction_model: Union[DialogueSimulator, VoterModel]
 
@@ -37,7 +37,7 @@ class SimulationRunner(BaseModel):
         for i, agent in enumerate(agents):
             graph.nodes[i]["agent"] = agent
 
-    @field_validator("interaction_model", mode='before')
+    @field_validator("interaction_model", mode="before")
     @classmethod
     def validate_interaction_model(cls, interaction_model, info):
         values = info.data if info.data else {}
@@ -85,21 +85,22 @@ class SimulationRunner(BaseModel):
         # Create OpinionAnalyzer for tracking opinion dynamics
         opinion_analyzer = OpinionAnalyzer(
             llm_client=None,  # Will be set based on model type
-            update_frequency=config.opinion_update_frequency
+            update_frequency=config.opinion_update_frequency,
         )
-        
+
         # Set the appropriate LLM client for opinion analysis
         if config.model_type.value in ["gpt-3.5-turbo", "gpt-3.5-turbo-16k"]:
-            from src.llm.openai_client import OpenAIClient
+            from llm.openai_client import OpenAIClient
+
             opinion_analyzer.llm_client = OpenAIClient(
                 model=config.model_type.value,
-                temperature=0.3  # Lower temperature for more consistent opinion analysis
+                temperature=0.3,  # Lower temperature for more consistent opinion analysis
             )
         else:
-            from src.llm.ollama_client import OllamaClient
+            from llm.ollama_client import OllamaClient
+
             opinion_analyzer.llm_client = OllamaClient(
-                model=config.model_type.value,
-                temperature=0.3
+                model=config.model_type.value, temperature=0.3
             )
 
         # Initialize agent opinions from personas

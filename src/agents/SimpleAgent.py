@@ -4,10 +4,9 @@ from personas.Persona import Persona
 from personas.generate_personas import generate_persona, base_template
 
 from typing import List, Optional
-from src.llm.base import LLMClient
-from src.llm.openai_client import OpenAIClient
-from src.llm.ollama_client import OllamaClient
-
+from llm.base import LLMClient
+from llm.openai_client import OpenAIClient
+from llm.ollama_client import OllamaClient
 
 
 from configs.configs import LLMConfig, ModelType
@@ -31,11 +30,13 @@ class SimpleAgent(BaseAgent):
     base_descriptor_system_message: str = """I want to create descriptions for different types of agent. Based on their personas, you should 
         add the following information for the agent: 1. Educational status 2. Political beliefs on the following 
         topics: - Abortion rights - Gun rights"""
-    subject_description: str = "You are a participant in a discussion with other people."
+    subject_description: str = (
+        "You are a participant in a discussion with other people."
+    )
     agent_description: Optional[str] = None
     personal_message_history: List[str] = Field(default_factory=lambda: [])
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def set_prefix(cls, values):
         if isinstance(values, dict):
@@ -126,8 +127,7 @@ Please describe the MediatingAgent's role and characteristics in this simulation
 
         self.agent_description = mediating_agent_description
 
-        self.system_message = (
-            f"""{simulation_description}
+        self.system_message = f"""{simulation_description}
                 You are the MediatingAgent.
                 Your role and characteristics are as follows: {mediating_agent_description}.
                 You initiate and moderate the conversations among the agents.
@@ -139,4 +139,3 @@ Please describe the MediatingAgent's role and characteristics in this simulation
                 Keep your responses concise.
                 Do not add anything else.
                 """
-            )
